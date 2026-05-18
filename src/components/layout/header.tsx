@@ -30,7 +30,7 @@ export function Header() {
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-background/70 backdrop-blur-2xl border-b border-border/40 shadow-[0_1px_3px_0_rgb(0_0_0/0.04)]"
+          ? "glass shadow-sm"
           : "bg-transparent"
       }`}
     >
@@ -38,7 +38,7 @@ export function Header() {
         <div className="flex h-[72px] items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-card shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:border-border">
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#4A90E2] to-[#357ABD] shadow-sm transition-all duration-200 group-hover:shadow-md">
               <svg
                 width="16"
                 height="16"
@@ -48,15 +48,13 @@ export function Header() {
               >
                 <path
                   d="M12 2L3 7v10l9 5 9-5V7l-9-5z"
-                  fill="currentColor"
-                  className="text-foreground"
+                  fill="white"
                   opacity="0.9"
                 />
                 <path
                   d="M12 2L3 7l9 5 9-5-9-5z"
-                  fill="currentColor"
-                  className="text-foreground"
-                  opacity="0.15"
+                  fill="white"
+                  opacity="0.3"
                 />
               </svg>
             </div>
@@ -67,7 +65,7 @@ export function Header() {
 
           {/* Center nav — floating pill */}
           <nav className="hidden md:flex items-center">
-            <div className="flex items-center gap-0.5 rounded-full border border-border/50 bg-muted/50 p-1 shadow-sm">
+            <div className="flex items-center gap-0.5 rounded-full border border-border/60 bg-muted/60 p-1 shadow-sm">
               {navItems.map((item) => {
                 const isActive =
                   pathname === item.href ||
@@ -95,7 +93,6 @@ export function Header() {
               <ConnectButton />
             </div>
 
-            {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="md:hidden flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-card transition-colors hover:bg-accent"
@@ -128,8 +125,8 @@ export function Header() {
                 href={item.href}
                 className={`flex items-center px-4 py-3 rounded-xl text-[14px] font-medium transition-colors ${
                   isActive
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
                 {item.label}

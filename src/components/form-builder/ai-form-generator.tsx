@@ -59,7 +59,7 @@ export function AIFormGenerator({ onGenerated }: AIFormGeneratorProps) {
   };
 
   return (
-    <div className="mb-8">
+    <div>
       <div className="rounded-xl border border-border/50 bg-accent/20 p-4">
         <div className="flex items-center gap-2 mb-3">
           <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">

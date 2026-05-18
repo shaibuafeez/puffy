@@ -5,14 +5,11 @@ import {
   Database,
   Shield,
   Share2,
-  BarChart3,
-  Fingerprint,
   ArrowRight,
   Sparkles,
   Lock,
   Globe,
   Star,
-  CheckCircle2,
   Webhook,
   Palette,
 } from "lucide-react";
@@ -94,44 +91,40 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* Hero */}
       <section className="relative overflow-hidden">
-        {/* Background effects */}
         <div className="absolute inset-0 grid-pattern" />
         <div className="absolute inset-0 hero-glow" />
 
-        <div className="relative mx-auto max-w-5xl px-6 pt-20 pb-16 md:pt-32 md:pb-20">
+        <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-16 md:pt-40 md:pb-24">
           <div className="flex flex-col items-center text-center">
-            {/* Badge */}
-            <div className="animate-fade-up opacity-0 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-[13px] text-primary mb-8">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-primary/60 animate-pulse-dot" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
-              Built for Walrus Sessions Hackathon
-            </div>
-
-            {/* Heading */}
-            <h1 className="animate-fade-up opacity-0 animation-delay-100 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
+            <h1 className="animate-fade-up opacity-0 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] mb-6">
               Decentralized Forms
               <br />
-              <span className="text-muted-foreground">
+              <span className="bg-gradient-to-r from-[#4A90E2] to-[#6B46C1] bg-clip-text text-transparent">
                 Powered by Walrus
               </span>
             </h1>
 
-            {/* Subtitle */}
-            <p className="animate-fade-up opacity-0 animation-delay-200 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed mb-10">
+            <p className="animate-fade-up opacity-0 animation-delay-100 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed mb-10">
               Create feedback forms, surveys, and bug reports with Seal-encrypted
               submissions stored on Walrus. No central server. No data silos.
               Your data, your keys.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="animate-fade-up opacity-0 animation-delay-300 flex flex-col sm:flex-row items-center gap-3">
-              <Button size="lg" className="h-12 px-6 text-[15px] glow-hover" render={<Link href="/create" />}>
+            <div className="animate-fade-up opacity-0 animation-delay-200 flex flex-col sm:flex-row items-center gap-3">
+              <Button
+                size="lg"
+                className="h-12 px-8 text-[15px] rounded-xl btn-gradient border-0"
+                render={<Link href="/create" />}
+              >
                 Start Building
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
-              <Button size="lg" variant="outline" className="h-12 px-6 text-[15px]" render={<Link href="/dashboard" />}>
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-12 px-8 text-[15px] rounded-xl border-border/60 hover:border-primary/40 hover:bg-primary/5"
+                render={<Link href="/dashboard" />}
+              >
                 View Dashboard
               </Button>
             </div>
@@ -139,23 +132,23 @@ export default function HomePage() {
         </div>
 
         {/* Animated Form Demo Mockup */}
-        <div className="relative mx-auto max-w-3xl px-6 pb-20 md:pb-28 animate-fade-up opacity-0 animation-delay-400">
+        <div className="relative mx-auto max-w-3xl px-6 pb-24 md:pb-32 animate-fade-up opacity-0 animation-delay-300">
           <FormDemoMockup />
         </div>
       </section>
 
       {/* Stats bar */}
-      <section className="border-t border-border/50 bg-muted/20">
+      <section className="border-t border-border/60 bg-muted/40">
         <div className="mx-auto max-w-4xl px-6 py-6">
           <div className="flex items-center justify-center gap-8 flex-wrap">
             {stats.map((stat, i) => (
               <div key={stat.label} className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-[13px] font-medium">
-                  <stat.icon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2.5 text-[13px] font-medium">
+                  <stat.icon className="h-4 w-4 text-primary" />
                   {stat.label}
                 </div>
                 {i < stats.length - 1 && (
-                  <div className="h-4 w-px bg-border/60 hidden sm:block" />
+                  <div className="h-4 w-px bg-border hidden sm:block" />
                 )}
               </div>
             ))}
@@ -164,10 +157,10 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="relative border-t border-border/50">
+      <section className="relative">
         <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
           <div className="text-center mb-16">
-            <p className="text-[13px] font-medium text-primary uppercase tracking-widest mb-3">
+            <p className="text-[13px] font-semibold text-primary uppercase tracking-widest mb-3">
               Features
             </p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
@@ -177,18 +170,18 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className={`group relative rounded-2xl border bg-card p-6 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 ${
+                className={`group relative rounded-2xl border p-6 card-hover ${
                   feature.hero
-                    ? "gradient-border"
-                    : "border-border/50 hover:border-border"
+                    ? "gradient-border bg-card"
+                    : "border-border/50 bg-card hover:border-primary/30"
                 }`}
               >
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-muted mb-4">
-                  <feature.icon className="h-5 w-5 text-foreground" />
+                <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 mb-4">
+                  <feature.icon className="h-5 w-5 text-primary" />
                 </div>
                 <h3 className="font-semibold text-[15px] mb-2">{feature.title}</h3>
                 <p className="text-[13px] text-muted-foreground leading-relaxed">
@@ -204,7 +197,7 @@ export default function HomePage() {
       <section className="relative border-t border-border/50 bg-muted/30">
         <div className="mx-auto max-w-5xl px-6 py-24 md:py-32">
           <div className="text-center mb-16">
-            <p className="text-[13px] font-medium text-primary uppercase tracking-widest mb-3">
+            <p className="text-[13px] font-semibold text-primary uppercase tracking-widest mb-3">
               How it works
             </p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
@@ -215,16 +208,15 @@ export default function HomePage() {
           <div className="grid gap-8 md:grid-cols-3">
             {steps.map((step, i) => (
               <div key={step.num} className="relative">
-                {/* Connector line */}
                 {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-[calc(50%+40px)] w-[calc(100%-80px)] h-px border-t border-dashed border-border" />
+                  <div className="hidden md:block absolute top-8 left-[calc(50%+40px)] w-[calc(100%-80px)] h-px border-t border-dashed border-primary/20" />
                 )}
                 <div className="flex flex-col items-center text-center">
                   <div className="relative mb-6">
                     <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-card border border-border/50 shadow-sm">
                       <step.icon className="h-6 w-6 text-primary" />
                     </div>
-                    <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-[11px] font-bold">
+                    <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[#4A90E2] to-[#357ABD] text-white text-[11px] font-bold shadow-sm">
                       {step.num}
                     </span>
                   </div>
@@ -240,8 +232,9 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="border-t border-border/50">
-        <div className="mx-auto max-w-3xl px-6 py-24 md:py-32 text-center">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 hero-glow opacity-50" />
+        <div className="relative mx-auto max-w-3xl px-6 py-24 md:py-32 text-center">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
             Ready to build?
           </h2>
@@ -249,7 +242,11 @@ export default function HomePage() {
             Create your first decentralized form in under a minute.
             No setup required — just connect your wallet and go.
           </p>
-          <Button size="lg" className="h-12 px-8 text-[15px] glow-hover" render={<Link href="/create" />}>
+          <Button
+            size="lg"
+            className="h-12 px-8 text-[15px] rounded-xl btn-gradient border-0"
+            render={<Link href="/create" />}
+          >
             Create Your First Form
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -260,24 +257,24 @@ export default function HomePage() {
       <footer className="border-t border-border/50">
         <div className="mx-auto max-w-6xl px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 text-[13px] text-muted-foreground">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#4A90E2] to-[#357ABD]">
               <svg
-                width="12"
-                height="12"
+                width="14"
+                height="14"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-primary"
+                className="text-white"
               >
                 <path d="M12 3L2 9l10 6 10-6-10-6z" />
                 <path d="M2 17l10 6 10-6" />
                 <path d="M2 13l10 6 10-6" />
               </svg>
             </div>
-            <span className="font-medium text-foreground">Walform</span>
+            <span className="font-semibold text-foreground">Walform</span>
           </div>
           <p className="text-[13px] text-muted-foreground">
             Stored on Walrus. Encrypted with Seal. Secured by Sui.

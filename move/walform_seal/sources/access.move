@@ -1,6 +1,47 @@
 module walform_seal::access {
     use sui::event;
 
+    // === Admin Registry ===
+
+    /// Shared admin registry. Admins can review the app and add other admins.
+    public struct AdminRegistry has key {
+        id: UID,
+        admins: vector<address>,
+    }
+
+    public struct AdminAdded has copy, drop {
+        admin: address,
+        added_by: address,
+    }
+
+    /// Initialize with deployer + hackathon judge as admins.
+    fun init(ctx: &mut TxContext) {
+        let sender = ctx.sender();
+        let judge: address = @0xc4d6ee019649edba41d5a5ed1081fe3c86afc41fea413195dd6ecdd0f6090e54;
+
+        let registry = AdminRegistry {
+            id: object::new(ctx),
+            admins: vector[sender, judge],
+        };
+        transfer::share_object(registry);
+    }
+
+    /// Add a new admin. Only existing admins can call this.
+    entry fun add_admin(registry: &mut AdminRegistry, addr: address, ctx: &TxContext) {
+        assert!(registry.admins.contains(&ctx.sender()), 0);
+        if (!registry.admins.contains(&addr)) {
+            registry.admins.push_back(addr);
+            event::emit(AdminAdded { admin: addr, added_by: ctx.sender() });
+        };
+    }
+
+    /// Check if an address is an admin.
+    public fun is_admin(registry: &AdminRegistry, addr: address): bool {
+        registry.admins.contains(&addr)
+    }
+
+    // === Seal Encryption Allowlists ===
+
     /// An allowlist that controls who can decrypt Seal-encrypted data.
     /// The form owner creates this when enabling encryption on a form.
     public struct Allowlist has key, store {

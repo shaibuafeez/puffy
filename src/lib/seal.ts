@@ -7,7 +7,7 @@ import type { SealCompatibleClient } from "@mysten/seal";
 
 // Our deployed Move package on testnet
 export const SEAL_PACKAGE_ID =
-  "0x52a93a59870a877eda57ad623f9d56c3e10cc36017e73bc0da8564a1dbe31106";
+  "0x1e998bf83e5e379308d0662ddfd09cfc358e35cb002281280ad36892b94c90a1";
 
 // Seal key server configs for testnet
 const SEAL_KEY_SERVERS = [

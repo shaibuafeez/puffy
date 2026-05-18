@@ -13,13 +13,13 @@ export default function CreatePage() {
       <div className="flex gap-8">
         {/* Builder */}
         <div className="flex-1 min-w-0 max-w-3xl">
-          <AIFormGenerator onGenerated={formState.loadGenerated} />
           <FormBuilder formState={formState} />
         </div>
 
-        {/* Live preview */}
+        {/* Right sidebar: AI generator + live preview */}
         <div className="hidden lg:block w-[400px] shrink-0">
-          <div className="sticky top-20">
+          <div className="sticky top-20 space-y-6">
+            <AIFormGenerator onGenerated={formState.loadGenerated} />
             <FormPreview
               title={formState.title}
               description={formState.description}
