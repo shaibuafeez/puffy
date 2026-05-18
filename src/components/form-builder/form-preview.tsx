@@ -61,7 +61,7 @@ export function FormPreview({
 
         {/* Preview content — mini Typeform mockup */}
         <div
-          className="relative p-5 min-h-[320px] flex flex-col"
+          className="relative p-6 min-h-[400px] flex flex-col"
           style={{
             backgroundColor: bgColor,
             color: textColor,
