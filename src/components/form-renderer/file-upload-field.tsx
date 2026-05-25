@@ -16,7 +16,7 @@ interface FileUploadFieldProps {
 export function FileUploadField({
   value,
   onChange,
-  acceptTypes = ["image/*"],
+  acceptTypes = ["image/*", "video/*"],
   maxFileSize = MAX_FILE_SIZE,
 }: FileUploadFieldProps) {
   const [uploading, setUploading] = useState(false);

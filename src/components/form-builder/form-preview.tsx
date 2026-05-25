@@ -1,17 +1,8 @@
 "use client";
 
-import { Star } from "lucide-react";
 import { getBlobUrl } from "@/lib/walrus";
 import { FIELD_TYPE_CONFIG } from "@/lib/constants";
-import type { FormField, FormSettings, FontFamily } from "@/lib/types";
-
-const FONT_MAP: Record<FontFamily, string> = {
-  inter: "'Inter', sans-serif",
-  roboto: "'Roboto', sans-serif",
-  "space-grotesk": "'Space Grotesk', sans-serif",
-  "dm-sans": "'DM Sans', sans-serif",
-  "plus-jakarta": "'Plus Jakarta Sans', sans-serif",
-};
+import type { FormField, FormSettings } from "@/lib/types";
 
 interface FormPreviewProps {
   title: string;
@@ -27,158 +18,119 @@ export function FormPreview({
   settings,
 }: FormPreviewProps) {
   const theme = settings.theme;
+  const accent = theme?.primaryColor || "#f15b3b";
   const firstField = fields[0];
 
-  const bgColor = theme?.backgroundColor || "#0a0a0a";
-  const textColor = theme?.textColor || "#f2f2f2";
-  const accentColor = theme?.primaryColor || textColor;
-  const fontFamily = theme?.fontFamily
-    ? FONT_MAP[theme.fontFamily]
-    : "'Inter', sans-serif";
-
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">
-          Live Preview
-        </p>
-        <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse-dot" />
+    <div>
+      {/* Header */}
+      <div className="flex justify-between items-baseline mb-3.5">
+        <span className="mono-label text-[11px]">&mdash;&mdash; proof copy</span>
+        <span className="mono-label text-[10px]">puffy.wal.app/f/8a4b&hellip;</span>
       </div>
 
-      {/* Scaled preview container */}
-      <div className="rounded-xl border border-border/50 overflow-hidden bg-card">
-        {/* Fake browser chrome */}
-        <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border/30 bg-muted/30">
-          <div className="flex gap-1">
-            <div className="h-2 w-2 rounded-full bg-border/60" />
-            <div className="h-2 w-2 rounded-full bg-border/60" />
-            <div className="h-2 w-2 rounded-full bg-border/60" />
-          </div>
-          <div className="flex-1 mx-4">
-            <div className="h-3.5 rounded bg-muted/60 max-w-[120px] mx-auto" />
-          </div>
+      {/* Preview card */}
+      <div className="rounded-[18px] overflow-hidden relative"
+           style={{
+             background: "var(--cream)",
+             border: "1px solid color-mix(in oklab, var(--ink) 16%, transparent)",
+             boxShadow: "0 30px 60px -28px rgba(11,15,23,0.18)",
+           }}>
+        {/* Corner stamp */}
+        <div className="absolute top-4 right-4 serif-italic text-[11px] px-2 py-1 rounded"
+             style={{
+               letterSpacing: "0.16em",
+               textTransform: "uppercase",
+               color: "color-mix(in oklab, var(--ink) 35%, transparent)",
+               border: "1.5px solid currentColor",
+               transform: "rotate(8deg)",
+             }}>
+          Proof &middot; v.0
         </div>
 
-        {/* Preview content — mini Typeform mockup */}
-        <div
-          className="relative p-6 min-h-[400px] flex flex-col"
-          style={{
-            backgroundColor: bgColor,
-            color: textColor,
-            fontFamily,
-          }}
-        >
+        {/* Top bar with progress */}
+        <div className="px-5 pt-5 pb-3.5"
+             style={{ borderBottom: "1px solid color-mix(in oklab, var(--ink) 12%, transparent)" }}>
           {/* Progress bar */}
-          <div
-            className="h-0.5 rounded-full mb-4"
-            style={{ backgroundColor: `${textColor}15` }}
-          >
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{
-                width: fields.length > 0 ? `${(1 / fields.length) * 100}%` : "0%",
-                backgroundColor: accentColor,
-              }}
-            />
+          <div className="h-[3px] rounded-full overflow-hidden mb-3.5"
+               style={{ background: "color-mix(in oklab, var(--ink) 10%, transparent)" }}>
+            <div className="h-full rounded-full transition-all duration-500"
+                 style={{
+                   width: fields.length > 0 ? `${100 / fields.length}%` : "0%",
+                   background: accent,
+                 }} />
           </div>
+          <div className="flex justify-between mono-label text-[10.5px]"
+               style={{ color: "color-mix(in oklab, var(--ink) 60%, transparent)" }}>
+            <span>{title || "Untitled form"}</span>
+            <span>01 / {String(fields.length).padStart(2, "0")}</span>
+          </div>
+        </div>
 
-          {/* Logo */}
-          {theme?.logoBlobId && (
-            <div className="mb-3">
-              <img
-                src={getBlobUrl(theme.logoBlobId)}
-                alt=""
-                className="h-5 w-auto object-contain"
-              />
+        {/* Question content */}
+        <div className="px-5 pt-8 pb-6" style={{ minHeight: "280px" }}>
+          {!firstField ? (
+            <div className="text-center py-8">
+              <p className="serif-italic text-[15px]" style={{ color: "color-mix(in oklab, var(--ink) 40%, transparent)" }}>
+                Add a field to see preview
+              </p>
             </div>
+          ) : (
+            <>
+              <span className="mono-label text-[10px]" style={{ color: accent }}>&mdash;&mdash; question 01</span>
+              <div className="mt-2" style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 700,
+                fontSize: "20px",
+                lineHeight: 1.2,
+                letterSpacing: "-0.02em",
+                color: "var(--ink)",
+              }}>
+                {firstField.label || "Your first question"}
+                {firstField.required && <span style={{ color: accent, marginLeft: "4px" }}>*</span>}
+              </div>
+
+              {/* Field preview */}
+              <div className="mt-4">
+                <FieldPreviewV2 field={firstField} accent={accent} />
+              </div>
+
+              {/* OK button */}
+              <div className="mt-5 flex items-center gap-2.5">
+                <span className="px-3.5 py-2 rounded-full text-[12.5px] font-bold inline-flex items-center gap-1.5"
+                      style={{ background: accent, color: "white", fontFamily: "var(--font-body)" }}>
+                  OK <span className="text-[11px]">&#10003;</span>
+                </span>
+                <span className="mono-label text-[10.5px] opacity-50">&crarr; ENTER</span>
+              </div>
+            </>
           )}
+        </div>
 
-          {/* Title header */}
-          <div className="mb-1">
-            <p
-              className="text-[10px] font-medium truncate"
-              style={{ opacity: 0.4 }}
-            >
-              {title || "Untitled form"}
-            </p>
-          </div>
-
-          {/* Field preview */}
-          <div className="flex-1 flex flex-col justify-center">
-            {!firstField ? (
-              <div className="text-center py-8">
-                <p className="text-[11px]" style={{ opacity: 0.3 }}>
-                  Add a field to see preview
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div>
-                  <span
-                    className="text-[9px]"
-                    style={{ opacity: 0.3 }}
-                  >
-                    1 &rarr;
-                  </span>
-                  <h3 className="text-[14px] font-semibold leading-tight mt-0.5">
-                    {firstField.label || "Untitled Field"}
-                    {firstField.required && (
-                      <span className="text-red-400 ml-0.5">*</span>
-                    )}
-                  </h3>
-                  {firstField.description && (
-                    <p className="text-[10px] mt-0.5" style={{ opacity: 0.4 }}>
-                      {firstField.description}
-                    </p>
-                  )}
-                </div>
-
-                {/* Fake input based on type */}
-                <FieldPreview field={firstField} textColor={textColor} accentColor={accentColor} />
-
-                {/* OK button */}
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-5 px-2.5 rounded text-[9px] font-medium flex items-center"
-                    style={{
-                      backgroundColor: accentColor,
-                      color: bgColor,
-                    }}
-                  >
-                    OK
-                  </div>
-                  <span className="text-[8px]" style={{ opacity: 0.25 }}>
-                    Enter
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Step counter */}
-          {fields.length > 0 && (
-            <div
-              className="text-[9px] text-right mt-3 tabular-nums"
-              style={{ opacity: 0.3 }}
-            >
-              1 of {fields.length}
-            </div>
+        {/* Footer */}
+        <div className="px-4 py-2.5 flex justify-between"
+             style={{ borderTop: "1px solid color-mix(in oklab, var(--ink) 12%, transparent)" }}>
+          <span className="mono-label text-[10px]">Puffy &middot; Walrus</span>
+          {settings.encryptSubmissions && (
+            <span className="mono-label text-[10px]" style={{ color: accent }}>&#9679; seal encrypted</span>
           )}
         </div>
       </div>
 
-      {/* Field count badge */}
+      {/* Field count badges */}
       {fields.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 mt-3">
           {fields.map((f, i) => (
-            <div
-              key={f.id}
-              className={`h-5 px-1.5 rounded text-[9px] flex items-center gap-1 border ${
-                i === 0
-                  ? "border-foreground/20 bg-foreground/5 text-foreground"
-                  : "border-border/50 text-muted-foreground"
-              }`}
-            >
+            <div key={f.id}
+              className="h-5 px-1.5 rounded text-[9px] flex items-center gap-1"
+              style={{
+                border: i === 0
+                  ? "1px solid color-mix(in oklab, var(--ink) 20%, transparent)"
+                  : "1px solid color-mix(in oklab, var(--ink) 10%, transparent)",
+                color: i === 0 ? "var(--ink)" : "color-mix(in oklab, var(--ink) 55%, transparent)",
+                background: i === 0 ? "color-mix(in oklab, var(--ink) 5%, transparent)" : "transparent",
+                fontFamily: "var(--font-mono)",
+              }}>
               <span className="opacity-50">{i + 1}</span>
               {FIELD_TYPE_CONFIG[f.type]?.label || f.type}
             </div>
@@ -189,90 +141,73 @@ export function FormPreview({
   );
 }
 
-function FieldPreview({
-  field,
-  textColor,
-  accentColor,
-}: {
-  field: FormField;
-  textColor: string;
-  accentColor: string;
-}) {
+function FieldPreviewV2({ field, accent }: { field: FormField; accent: string }) {
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "10px 12px",
+    borderRadius: "10px",
+    border: "1.5px solid color-mix(in oklab, var(--ink) 18%, transparent)",
+    background: "rgba(255,255,255,0.5)",
+    fontFamily: "var(--font-serif)",
+    fontStyle: "italic",
+    fontSize: "13px",
+    color: "color-mix(in oklab, var(--ink) 50%, transparent)",
+  };
+
   switch (field.type) {
-    case "text":
-    case "email":
-    case "url":
-    case "number":
     case "textarea":
     case "richtext":
-      return (
-        <div
-          className="border-b pb-1.5"
-          style={{ borderColor: `${textColor}20` }}
-        >
-          <span className="text-[11px]" style={{ opacity: 0.25 }}>
-            {field.placeholder || "Type your answer here..."}
-          </span>
-        </div>
-      );
-
+      return <div style={{ ...inputStyle, minHeight: "60px" }}>{field.placeholder || "type your answer..."}</div>;
     case "star-rating":
       return (
-        <div className="flex gap-0.5">
+        <div className="flex gap-2">
           {Array.from({ length: field.maxRating || 5 }).map((_, i) => (
-            <Star
-              key={i}
-              className="h-4 w-4"
-              style={{ color: i < 3 ? accentColor : `${textColor}20` }}
-              fill={i < 3 ? "currentColor" : "none"}
-            />
+            <span key={i} style={{ fontSize: "24px", color: "color-mix(in oklab, var(--ink) 18%, transparent)" }}>&#9733;</span>
           ))}
         </div>
       );
-
-    case "dropdown":
-      return (
-        <div
-          className="h-6 rounded border px-2 flex items-center"
-          style={{ borderColor: `${textColor}20` }}
-        >
-          <span className="text-[10px]" style={{ opacity: 0.3 }}>
-            Select...
-          </span>
-        </div>
-      );
-
-    case "checkbox":
     case "radio":
+    case "checkbox":
       return (
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1.5">
           {(field.options || []).slice(0, 3).map((opt, i) => (
-            <div key={i} className="flex items-center gap-1.5">
-              <div
-                className={`h-3 w-3 border ${field.type === "radio" ? "rounded-full" : "rounded-sm"}`}
-                style={{ borderColor: `${textColor}30` }}
-              />
-              <span className="text-[10px]" style={{ opacity: 0.6 }}>
-                {opt}
-              </span>
+            <div key={i} className="flex items-center gap-2.5 p-2 rounded-[10px]"
+                 style={{ border: "1.5px solid color-mix(in oklab, var(--ink) 16%, transparent)", background: "rgba(255,255,255,0.5)" }}>
+              <span className="mono-label text-[10px]">{String.fromCharCode(65 + i)}</span>
+              <span className="text-[13px]">{opt}</span>
             </div>
           ))}
         </div>
       );
-
-    case "file-upload":
+    case "dropdown":
       return (
-        <div
-          className="h-10 rounded-lg border-2 border-dashed flex items-center justify-center"
-          style={{ borderColor: `${textColor}15` }}
-        >
-          <span className="text-[9px]" style={{ opacity: 0.25 }}>
-            Click to upload
-          </span>
+        <div style={{ ...inputStyle, display: "flex", justifyContent: "space-between" }}>
+          {(field.options && field.options[0]) || "choose one..."} <span>&#8964;</span>
         </div>
       );
-
+    case "file-upload":
+      return (
+        <div className="py-5 rounded-[10px] text-center"
+             style={{
+               border: "1.5px dashed color-mix(in oklab, var(--ink) 25%, transparent)",
+               fontFamily: "var(--font-mono)",
+               fontSize: "11px",
+               letterSpacing: "0.12em",
+               textTransform: "uppercase",
+               color: "color-mix(in oklab, var(--ink) 55%, transparent)",
+             }}>
+          &uarr; drop a file &middot; uploads to Walrus
+        </div>
+      );
+    case "confirm":
+      return (
+        <div className="flex items-center gap-2.5 p-2 rounded-[10px]"
+             style={{ border: "1.5px solid color-mix(in oklab, var(--ink) 16%, transparent)", background: "rgba(255,255,255,0.5)" }}>
+          <span style={{ fontSize: "14px", color: "color-mix(in oklab, var(--ink) 30%, transparent)" }}>&#9744;</span>
+          <span className="text-[13px]">{field.label || "I confirm"}</span>
+        </div>
+      );
     default:
-      return null;
+      return <div style={inputStyle}>{field.placeholder || "type here..."}</div>;
   }
 }

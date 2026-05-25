@@ -45,7 +45,7 @@ export function FormDemoMockup() {
           <div className="flex-1 mx-8">
             <div className="h-5 rounded-md bg-muted/60 max-w-xs mx-auto flex items-center justify-center">
               <span className="text-[10px] text-muted-foreground/50 font-mono">
-                walform.app/form/demo
+                puffy.wal.app/form/demo
               </span>
             </div>
           </div>

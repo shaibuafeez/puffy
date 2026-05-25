@@ -9,7 +9,8 @@ export type FieldType =
   | "checkbox"
   | "radio"
   | "star-rating"
-  | "file-upload";
+  | "file-upload"
+  | "confirm";
 
 export interface FormField {
   id: string;

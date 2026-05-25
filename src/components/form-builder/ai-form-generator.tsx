@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react";
 import { enclaveAction } from "@/lib/enclave";
-import { Sparkles, Loader2, ArrowRight } from "lucide-react";
 import type { FormField, FormSettings } from "@/lib/types";
 
 interface GeneratedForm {
@@ -27,7 +26,7 @@ export function AIFormGenerator({ onGenerated }: AIFormGeneratorProps) {
   const [prompt, setPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleGenerate = async () => {
     const text = prompt.trim();
@@ -52,7 +51,7 @@ export function AIFormGenerator({ onGenerated }: AIFormGeneratorProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleGenerate();
     }
@@ -60,66 +59,65 @@ export function AIFormGenerator({ onGenerated }: AIFormGeneratorProps) {
 
   return (
     <div>
-      <div className="rounded-xl border border-border/50 bg-accent/20 p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-          </div>
-          <span className="text-[13px] font-medium">AI Form Generator</span>
-        </div>
-
-        <div className="relative">
-          <textarea
-            ref={inputRef}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Describe the form you want to create..."
-            disabled={generating}
-            rows={2}
-            className="w-full bg-background rounded-lg border border-border/60 px-3 py-2.5 pr-10 text-[14px] outline-none placeholder:text-muted-foreground/40 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 resize-none disabled:opacity-50"
-          />
-          <button
-            onClick={handleGenerate}
-            disabled={generating || !prompt.trim()}
-            className="absolute right-2 bottom-2.5 h-7 w-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            {generating ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <ArrowRight className="h-3.5 w-3.5" />
-            )}
-          </button>
-        </div>
-
-        {error && (
-          <p className="text-[12px] text-destructive mt-2">{error}</p>
-        )}
-
-        {!prompt && !generating && (
-          <div className="flex flex-wrap gap-1.5 mt-2.5">
-            {EXAMPLES.map((example) => (
-              <button
-                key={example}
-                onClick={() => {
-                  setPrompt(example);
-                  inputRef.current?.focus();
-                }}
-                className="text-[11px] px-2 py-1 rounded-md bg-background border border-border/40 text-muted-foreground hover:text-foreground hover:border-border transition-colors truncate max-w-[280px]"
-              >
-                {example}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {generating && (
-          <p className="text-[12px] text-muted-foreground mt-2 flex items-center gap-1.5">
-            <Loader2 className="h-3 w-3 animate-spin" />
-            Generating your form with AI...
-          </p>
-        )}
+      <div className="flex items-center gap-3 p-1.5 pl-4 md:pl-5 rounded-[16px]"
+           style={{
+             background: "var(--ink)",
+             border: "1px solid color-mix(in oklab, var(--ink) 90%, transparent)",
+           }}>
+        <span className="shrink-0 flex items-center gap-2">
+          <span style={{ color: "var(--coral)", fontSize: 16 }}>&#10038;</span>
+          <span className="text-[12px] font-semibold tracking-wide uppercase hidden md:block"
+                style={{ fontFamily: "var(--font-mono)", color: "var(--cream)", letterSpacing: "0.1em" }}>
+            Generate with AI
+          </span>
+        </span>
+        <input
+          ref={inputRef}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Describe your form — e.g. 'NPS for SDK users' or 'bug report with severity'"
+          disabled={generating}
+          className="flex-1 bg-transparent outline-none py-3 text-[14px] min-w-0 placeholder:text-[color-mix(in_oklab,var(--cream)_40%,transparent)]"
+          style={{
+            fontFamily: "var(--font-body)",
+            color: "var(--cream)",
+            border: "none",
+          }}
+        />
+        <button onClick={handleGenerate}
+          disabled={generating || !prompt.trim()}
+          className="shrink-0 px-5 py-2.5 rounded-[12px] text-[13px] font-semibold inline-flex items-center gap-2 transition-all disabled:opacity-30"
+          style={{
+            background: "var(--coral)",
+            color: "var(--ink)",
+            fontFamily: "var(--font-body)",
+          }}>
+          {generating ? "Generating" : "Generate"}
+          <span>{generating ? "\u2026" : "\u2192"}</span>
+        </button>
       </div>
+
+      {!prompt && !generating && (
+        <div className="flex gap-2 mt-2.5 flex-wrap">
+          {EXAMPLES.slice(0, 3).map((ex, i) => (
+            <button key={i} onClick={() => { setPrompt(ex); inputRef.current?.focus(); }}
+              className="px-3 py-1.5 rounded-full text-[11.5px] transition-colors cursor-pointer"
+              style={{
+                fontFamily: "var(--font-mono)",
+                background: "var(--cream-deep)",
+                color: "color-mix(in oklab, var(--ink) 60%, transparent)",
+                border: "1px solid color-mix(in oklab, var(--ink) 10%, transparent)",
+              }}>
+              {ex.length > 50 ? ex.slice(0, 50) + "…" : ex}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <p className="text-[12px] mt-2" style={{ color: "var(--coral)" }}>{error}</p>
+      )}
     </div>
   );
 }

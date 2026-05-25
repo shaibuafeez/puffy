@@ -8,25 +8,16 @@ import {
   useSuiClient,
 } from "@mysten/dapp-kit";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { SlashCommandMenu } from "./field-type-picker";
 import { FieldEditor } from "./field-editor";
 import { FormSettingsEditor } from "./form-settings";
 import type { useFormBuilder } from "@/hooks/use-form-builder";
 import { useUserForms } from "@/hooks/use-user-forms";
 import { storeJSON } from "@/lib/walrus";
+import { enclaveAction } from "@/lib/enclave";
 import { buildCreateAllowlistTx } from "@/lib/seal";
 import type { FormDefinition } from "@/lib/types";
 import type { FieldType } from "@/lib/types";
-import {
-  Plus,
-  Loader2,
-  Rocket,
-  Wallet,
-  ChevronDown,
-  ChevronRight,
-  Settings,
-} from "lucide-react";
 
 interface FormBuilderProps {
   formState: ReturnType<typeof useFormBuilder>;
@@ -64,6 +55,7 @@ export function FormBuilder({ formState }: FormBuilderProps) {
   } | null>(null);
   const [insertIndex, setInsertIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showSlash, setShowSlash] = useState(false);
 
   const openMenuAt = useCallback(
     (e: React.MouseEvent, index: number) => {
@@ -82,21 +74,12 @@ export function FormBuilder({ formState }: FormBuilderProps) {
 
   const handleMenuSelect = useCallback(
     (type: FieldType) => {
-      const fieldId = addField(type);
-      // If inserting at a specific index, move the field there
-      if (insertIndex !== null && insertIndex < fields.length) {
-        // The new field is at the end, we need to move it to insertIndex
-        // moveField moves one step at a time, so we'll handle this differently
-        // Actually, we just added it at the end. Let's reorder.
-        // For simplicity, we move it up from the end to the target position
-        const currentIndex = fields.length; // it will be at this index after addField
-        // We need to move it (fields.length - insertIndex) times up
-        // But since addField is async via setState, we handle this with a setTimeout
-      }
+      addField(type);
       setMenuPosition(null);
       setInsertIndex(null);
+      setShowSlash(false);
     },
-    [addField, insertIndex, fields.length]
+    [addField]
   );
 
   const handlePublish = async () => {
@@ -154,6 +137,28 @@ export function FormBuilder({ formState }: FormBuilderProps) {
       toast.info("Publishing form to Walrus...");
       const formBlobId = await storeJSON(formDef);
 
+      // Register with enclave so dashboard works from any device
+      try {
+        await enclaveAction("register_form", {
+          formId,
+          formBlobId,
+          ownerWallet: account.address,
+          title,
+          sealAllowlistId,
+          createdAt: formDef.createdAt,
+        });
+      } catch {
+        // Retry once
+        await enclaveAction("register_form", {
+          formId,
+          formBlobId,
+          ownerWallet: account.address,
+          title,
+          sealAllowlistId,
+          createdAt: formDef.createdAt,
+        }).catch(() => toast.warning("Form saved but enclave registration failed. It may not appear in your dashboard on other devices."));
+      }
+
       addForm({
         formId,
         formBlobId,
@@ -177,54 +182,67 @@ export function FormBuilder({ formState }: FormBuilderProps) {
   if (!account) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
-          <Wallet className="h-7 w-7 text-primary" />
+        <div className="heading-display text-[clamp(28px,4vw,48px)]">
+          Connect your <em className="serif-italic font-normal">wallet</em>
         </div>
-        <h2 className="text-xl font-semibold mb-2">Connect Your Wallet</h2>
-        <p className="text-[13px] text-muted-foreground max-w-sm">
-          Connect a Sui wallet to start creating forms on Walrus
+        <p className="serif-italic text-[17px] mt-4" style={{ color: "color-mix(in oklab, var(--ink) 60%, transparent)" }}>
+          Connect a Sui wallet to start creating forms on Walrus.
         </p>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="relative space-y-1">
-      {/* Title */}
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Untitled form"
-        className="w-full bg-transparent text-3xl font-bold tracking-tight outline-none placeholder:text-muted-foreground/30"
-      />
+    <div ref={containerRef} className="relative">
+      {/* Title + description */}
+      <div className="pt-7 border-t mt-2" style={{ borderColor: "color-mix(in oklab, var(--ink) 14%, transparent)" }}>
+        <div className="mono-label text-[11px] mb-4">&mdash; The composition</div>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Untitled form"
+          className="w-full bg-transparent outline-none p-0"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 800,
+            fontSize: "clamp(36px, 5vw, 72px)",
+            lineHeight: 1,
+            letterSpacing: "-0.035em",
+            color: "var(--ink)",
+            border: "none",
+          }}
+        />
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Add a deck -- italic by default."
+          rows={1}
+          className="w-full bg-transparent outline-none p-0 mt-4 resize-none"
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontStyle: "italic",
+            fontWeight: 400,
+            fontSize: "clamp(18px, 2vw, 26px)",
+            lineHeight: 1.35,
+            color: "color-mix(in oklab, var(--ink) 65%, transparent)",
+            border: "none",
+          }}
+        />
+      </div>
 
-      {/* Description */}
-      <input
-        type="text"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Add a description..."
-        className="w-full bg-transparent text-[15px] text-muted-foreground outline-none placeholder:text-muted-foreground/30 mb-6"
-      />
+      {/* Field list */}
+      <div className="mt-9">
+        <div className="flex justify-between items-baseline pb-3 mb-2 border-b"
+             style={{ borderColor: "color-mix(in oklab, var(--ink) 14%, transparent)" }}>
+          <span className="mono-label text-[11px]">The questions</span>
+          <span className="mono-label text-[11px]">{String(fields.length).padStart(2, "0")} total &middot; drag to reorder</span>
+        </div>
 
-      {/* Divider */}
-      <div className="h-px bg-border/40 my-6" />
-
-      {/* Fields */}
-      <div className="space-y-0.5">
         {fields.length === 0 && (
           <div className="py-12 text-center">
-            <p className="text-[13px] text-muted-foreground/60 mb-3">
+            <p className="serif-italic text-[17px]" style={{ color: "color-mix(in oklab, var(--ink) 50%, transparent)" }}>
               No fields yet
             </p>
-            <button
-              onClick={(e) => openMenuAt(e, 0)}
-              className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add your first field
-            </button>
           </div>
         )}
 
@@ -244,87 +262,117 @@ export function FormBuilder({ formState }: FormBuilderProps) {
                 )
               }
             />
-
-            {/* Insert button between blocks */}
-            <div className="group/insert flex items-center justify-center h-3 -my-0.5 relative">
-              <button
-                onClick={(e) => openMenuAt(e, index + 1)}
-                className="opacity-0 group-hover/insert:opacity-100 absolute flex items-center justify-center h-5 w-5 rounded-full bg-muted hover:bg-accent border border-border/50 transition-all z-10"
-              >
-                <Plus className="h-3 w-3 text-muted-foreground" />
-              </button>
-              <div className="opacity-0 group-hover/insert:opacity-100 w-full h-px bg-border/40 transition-opacity" />
-            </div>
           </div>
         ))}
 
-        {/* Add field button at end */}
-        {fields.length > 0 && (
-          <button
-            onClick={(e) => openMenuAt(e, fields.length)}
-            className="flex items-center gap-2 w-full py-3 px-2 text-[13px] text-muted-foreground/50 hover:text-muted-foreground transition-colors rounded-lg hover:bg-accent/30"
-          >
-            <Plus className="h-4 w-4" />
-            Add a field
+        {/* Add field button */}
+        <div className="relative mt-4">
+          <button onClick={() => setShowSlash((s) => !s)}
+            className="w-full py-5 px-6 rounded-[14px] flex items-center justify-center gap-4 transition-colors"
+            style={{
+              background: "transparent",
+              border: "1.5px dashed color-mix(in oklab, var(--ink) 30%, transparent)",
+              fontFamily: "var(--font-serif)",
+              fontStyle: "italic",
+              fontWeight: 400,
+              fontSize: "20px",
+              color: "color-mix(in oklab, var(--ink) 65%, transparent)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "var(--coral)";
+              e.currentTarget.style.color = "var(--coral)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "color-mix(in oklab, var(--ink) 30%, transparent)";
+              e.currentTarget.style.color = "color-mix(in oklab, var(--ink) 65%, transparent)";
+            }}>
+            <span className="mono-label text-[12px]" style={{ color: "inherit" }}>
+              {String(fields.length + 1).padStart(2, "0")}
+            </span>
+            <span>add another question</span>
+            <span className="mono-label text-[11px] opacity-50">/</span>
           </button>
-        )}
+          {showSlash && (
+            <SlashCommandMenu
+              position={{ top: 0, left: 0 }}
+              onSelect={handleMenuSelect}
+              onClose={() => setShowSlash(false)}
+            />
+          )}
+        </div>
       </div>
 
-      {/* Slash command menu */}
-      <SlashCommandMenu
-        position={menuPosition}
-        onSelect={handleMenuSelect}
-        onClose={() => {
-          setMenuPosition(null);
-          setInsertIndex(null);
-        }}
-      />
+      {/* Slash command menu (positioned) */}
+      {menuPosition && (
+        <SlashCommandMenu
+          position={menuPosition}
+          onSelect={handleMenuSelect}
+          onClose={() => {
+            setMenuPosition(null);
+            setInsertIndex(null);
+          }}
+        />
+      )}
 
-      {/* Divider before settings */}
-      <div className="h-px bg-border/40 !mt-8 !mb-4" />
+      {/* Publish strip */}
+      <div className="mt-16 p-6 md:p-8 rounded-[18px] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 flex-wrap"
+           style={{ background: "var(--ink)", color: "var(--cream)" }}>
+        <div>
+          <div className="mono-label text-[11px]" style={{ color: "color-mix(in oklab, var(--cream) 55%, transparent)" }}>
+            &mdash; Step iv
+          </div>
+          <div className="mt-1" style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 800,
+            fontSize: "clamp(22px, 2.5vw, 28px)",
+            letterSpacing: "-0.025em",
+          }}>
+            Ready to <em className="serif-italic font-normal" style={{ color: "var(--coral)" }}>pin it</em> to Walrus?
+          </div>
+          <div className="text-[13px] mt-1.5" style={{ color: "color-mix(in oklab, var(--cream) 60%, transparent)" }}>
+            {settings.encryptSubmissions ? "Seal encryption ON" : "Public"} &middot; {fields.length} fields
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => setSettingsOpen((s) => !s)}
+            className="px-5 py-3 rounded-full text-[14px] font-semibold transition-colors"
+            style={{
+              background: "transparent",
+              color: "var(--cream)",
+              border: "1px solid color-mix(in oklab, var(--cream) 30%, transparent)",
+              fontFamily: "var(--font-body)",
+            }}>
+            Settings
+          </button>
+          <button onClick={handlePublish}
+            disabled={!isValid || publishing}
+            className="px-5 py-3 rounded-full text-[14px] font-semibold inline-flex items-center gap-2 transition-all disabled:opacity-50"
+            style={{
+              background: "var(--coral)",
+              color: "var(--ink)",
+              border: "none",
+              fontFamily: "var(--font-body)",
+            }}>
+            {publishing ? "Publishing..." : "Publish to Walrus"}
+            <span>&#8599;</span>
+          </button>
+        </div>
+      </div>
 
-      {/* Settings (collapsible) */}
-      <button
-        onClick={() => setSettingsOpen(!settingsOpen)}
-        className="flex items-center gap-2 w-full py-2 text-[12px] font-medium text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
-      >
-        {settingsOpen ? (
-          <ChevronDown className="h-3 w-3" />
-        ) : (
-          <ChevronRight className="h-3 w-3" />
-        )}
-        <Settings className="h-3 w-3" />
-        Settings
-      </button>
+      {/* Settings panel */}
       {settingsOpen && (
-        <div className="animate-in fade-in slide-in-from-top-1 duration-150">
+        <div className="mt-6 p-7 rounded-[18px]"
+             style={{
+               background: "var(--cream-deep)",
+               border: "1px solid color-mix(in oklab, var(--ink) 14%, transparent)",
+             }}>
+          <div className="flex justify-between items-baseline mb-5">
+            <span className="mono-label text-[11px]">&mdash;&mdash; form settings</span>
+            <button onClick={() => setSettingsOpen(false)} className="mono-label text-[11px]">close</button>
+          </div>
           <FormSettingsEditor settings={settings} onUpdate={updateSettings} />
         </div>
       )}
-
-      {/* Publish */}
-      <div className="!mt-8">
-        <Button
-          onClick={handlePublish}
-          disabled={!isValid || publishing}
-          className="w-full h-12 text-[15px] rounded-xl glow-hover"
-          size="lg"
-        >
-          {publishing ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              {settings.encryptSubmissions
-                ? "Creating allowlist & publishing..."
-                : "Publishing to Walrus..."}
-            </>
-          ) : (
-            <>
-              <Rocket className="h-4 w-4 mr-2" />
-              Publish Form
-            </>
-          )}
-        </Button>
-      </div>
     </div>
   );
 }

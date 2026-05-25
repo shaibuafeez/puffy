@@ -98,7 +98,7 @@ export default function LinkTwitterPage() {
             <span className="text-[13px] font-medium">@{linkedHandle}</span>
           </div>
           <p className="text-[12px] text-muted-foreground mb-6">
-            You can now tweet <span className="font-mono">@walform</span> to create forms directly from X.
+            You can now tweet <span className="font-mono">@puffywal</span> to create forms directly from X.
           </p>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" className="rounded-lg" render={<Link href="/dashboard" />}>
@@ -130,7 +130,7 @@ export default function LinkTwitterPage() {
         <h1 className="text-xl font-semibold mb-2">Link X Account</h1>
         <p className="text-[13px] text-muted-foreground mb-6">
           Link your X (Twitter) account to create forms by mentioning{" "}
-          <span className="font-mono">@walform</span> in tweets.
+          <span className="font-mono">@puffywal</span> in tweets.
         </p>
         <Button
           onClick={handleLinkTwitter}
@@ -145,7 +145,7 @@ export default function LinkTwitterPage() {
           Connect X Account
         </Button>
         <p className="text-[11px] text-muted-foreground mt-4">
-          You&apos;ll be redirected to X to authorize Walform.
+          You&apos;ll be redirected to X to authorize Puffy.
         </p>
       </div>
     </div>

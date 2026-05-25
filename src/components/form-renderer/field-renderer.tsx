@@ -160,12 +160,25 @@ export function FieldRenderer({
           />
         );
 
+      case "confirm":
+        return (
+          <label className={`flex items-center gap-3 cursor-pointer rounded-xl border p-3 transition-all duration-200 ${
+            value ? "border-primary/30 bg-primary/5" : "border-border/50 hover:border-border hover:bg-accent/30"
+          }`}>
+            <Checkbox
+              checked={!!value}
+              onCheckedChange={(checked) => onChange(!!checked)}
+            />
+            <span className="text-[13px]">{field.label || "I confirm"}</span>
+          </label>
+        );
+
       default:
         return <Input value={(value as string) || ""} onChange={(e) => onChange(e.target.value)} className="h-11" />;
     }
   };
 
-  if (hideLabel) {
+  if (hideLabel || field.type === "confirm") {
     return (
       <div className="space-y-2.5">
         {renderField()}

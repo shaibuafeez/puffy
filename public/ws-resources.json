@@ -1,0 +1,12 @@
+{
+  "routes": {
+    "/create": "/create/index.html",
+    "/create/": "/create/index.html",
+    "/dashboard": "/dashboard/index.html",
+    "/dashboard/": "/dashboard/index.html",
+    "/link-twitter": "/link-twitter/index.html",
+    "/link-twitter/": "/link-twitter/index.html",
+    "/form/*": "/form/_/index.html",
+    "/dashboard/*": "/dashboard/_/index.html"
+  }
+}

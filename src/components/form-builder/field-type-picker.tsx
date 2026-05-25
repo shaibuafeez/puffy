@@ -3,32 +3,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { FIELD_TYPE_CONFIG } from "@/lib/constants";
 import type { FieldType } from "@/lib/types";
-import {
-  Type,
-  AlignLeft,
-  FileText,
-  Mail,
-  Link,
-  Hash,
-  ChevronDown,
-  CheckSquare,
-  Circle,
-  Star,
-  Upload,
-} from "lucide-react";
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Type,
-  AlignLeft,
-  FileText,
-  Mail,
-  Link,
-  Hash,
-  ChevronDown,
-  CheckSquare,
-  Circle,
-  Star,
-  Upload,
+const GLYPHS: Record<string, string> = {
+  text: "Aa", textarea: "\u00B6", richtext: "\u00B6", email: "@", url: "\u2197",
+  number: "#", dropdown: "\u2304", checkbox: "\u25A2", radio: "\u25EF",
+  "star-rating": "\u2605", "file-upload": "\u2191", confirm: "\u2713",
 };
 
 interface SlashCommandMenuProps {
@@ -59,7 +38,6 @@ export function SlashCommandMenu({
       config.description.toLowerCase().includes(filter.toLowerCase())
   );
 
-  // Reset filter and highlight when menu opens
   useEffect(() => {
     if (position) {
       setFilter("");
@@ -68,12 +46,10 @@ export function SlashCommandMenu({
     }
   }, [position]);
 
-  // Reset highlight when filter changes
   useEffect(() => {
     setHighlighted(0);
   }, [filter]);
 
-  // Click outside to close
   useEffect(() => {
     if (!position) return;
     const handleClick = (e: MouseEvent) => {
@@ -108,55 +84,72 @@ export function SlashCommandMenu({
 
   if (!position) return null;
 
+  // If position is (0,0) it means inline below the button
+  const isInline = position.top === 0 && position.left === 0;
+
   return (
     <div
       ref={menuRef}
-      className="absolute z-50 w-72 rounded-xl border border-border/60 bg-card shadow-xl animate-in fade-in slide-in-from-top-2 duration-150"
-      style={{ top: position.top, left: position.left }}
-    >
-      <div className="p-2 border-b border-border/30">
+      className="z-50 rounded-[14px] p-3.5 animate-in fade-in slide-in-from-top-2 duration-150"
+      style={{
+        position: isInline ? "absolute" : "absolute",
+        top: isInline ? "calc(100% + 6px)" : position.top,
+        left: isInline ? 0 : position.left,
+        right: isInline ? 0 : undefined,
+        width: isInline ? undefined : "auto",
+        minWidth: isInline ? undefined : "340px",
+        background: "var(--cream)",
+        border: "1px solid color-mix(in oklab, var(--ink) 16%, transparent)",
+        boxShadow: "0 30px 60px -20px rgba(11,15,23,0.25)",
+      }}>
+      {/* Header with filter */}
+      <div className="flex items-center gap-2.5 pb-2.5 mb-2.5"
+           style={{ borderBottom: "1px solid color-mix(in oklab, var(--ink) 14%, transparent)" }}>
+        <span className="mono-label text-[11px]">&mdash;&mdash; pick a field type</span>
         <input
           ref={inputRef}
-          type="text"
+          autoFocus
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Filter fields..."
-          className="w-full bg-transparent text-[13px] outline-none placeholder:text-muted-foreground/50 px-2 py-1.5"
+          placeholder="filter..."
+          className="flex-1 bg-transparent outline-none text-[12px] p-0"
+          style={{ fontFamily: "var(--font-mono)", color: "var(--ink)", border: "none" }}
         />
       </div>
-      <div className="p-1.5 max-h-[320px] overflow-y-auto">
+
+      {/* Grid of field types */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5">
         {filtered.length === 0 && (
-          <p className="text-[12px] text-muted-foreground text-center py-4">
+          <p className="text-[12px] text-center py-4 col-span-3" style={{ color: "color-mix(in oklab, var(--ink) 55%, transparent)" }}>
             No matching fields
           </p>
         )}
-        {filtered.map(([type, config], i) => {
-          const Icon = iconMap[config.icon] || Type;
-          return (
-            <button
-              key={type}
-              onClick={() => {
-                onSelect(type);
-                onClose();
-              }}
-              onMouseEnter={() => setHighlighted(i)}
-              className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors ${
-                i === highlighted ? "bg-accent" : "hover:bg-accent/50"
-              }`}
-            >
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted">
-                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-[13px] font-medium">{config.label}</div>
-                <div className="text-[11px] text-muted-foreground truncate">
-                  {config.description}
-                </div>
-              </div>
-            </button>
-          );
-        })}
+        {filtered.map(([type, config], i) => (
+          <button
+            key={type}
+            onClick={() => {
+              onSelect(type);
+              onClose();
+            }}
+            onMouseEnter={() => setHighlighted(i)}
+            className="flex items-center gap-2.5 p-2.5 rounded-[10px] text-left transition-colors"
+            style={{
+              background: i === highlighted ? "var(--cream-deep)" : "transparent",
+            }}>
+            <span className="w-7 h-7 rounded-lg inline-flex items-center justify-center shrink-0 text-[14px] font-bold"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    background: "rgba(0,0,0,0.06)",
+                  }}>
+              {GLYPHS[type] || "?"}
+            </span>
+            <span className="flex flex-col items-start min-w-0">
+              <span className="text-[13px] font-semibold">{config.label}</span>
+              <span className="mono-label text-[10px]">{config.description}</span>
+            </span>
+          </button>
+        ))}
       </div>
     </div>
   );

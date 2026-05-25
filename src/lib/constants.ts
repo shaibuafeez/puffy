@@ -1,16 +1,13 @@
 import { type FieldType } from "./types";
 
-export const WALRUS_PUBLISHER =
-  process.env.NEXT_PUBLIC_WALRUS_PUBLISHER ||
-  "https://publisher.walrus-testnet.walrus.space";
 export const WALRUS_AGGREGATOR =
   process.env.NEXT_PUBLIC_WALRUS_AGGREGATOR ||
-  "https://aggregator.walrus-testnet.walrus.space";
+  "https://aggregator.walrus-mainnet.walrus.space";
 export const WALRUS_EPOCHS = Number(
   process.env.NEXT_PUBLIC_WALRUS_EPOCHS || 5
 );
 export const SUI_NETWORK = (process.env.NEXT_PUBLIC_SUI_NETWORK ||
-  "testnet") as "testnet" | "mainnet";
+  "mainnet") as "testnet" | "mainnet";
 export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -60,6 +57,11 @@ export const FIELD_TYPE_CONFIG: Record<
     label: "File Upload",
     icon: "Upload",
     description: "Upload images or videos",
+  },
+  confirm: {
+    label: "Confirmation",
+    icon: "CheckSquare",
+    description: "Require a checkbox confirmation",
   },
 };
 

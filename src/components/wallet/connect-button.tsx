@@ -7,7 +7,6 @@ import {
   useDisconnectWallet,
 } from "@mysten/dapp-kit";
 import { truncateAddress } from "@/lib/utils";
-import { LogOut, ChevronDown, Wallet, Copy, Check } from "lucide-react";
 
 export function ConnectButton() {
   const account = useCurrentAccount();
@@ -27,49 +26,57 @@ export function ConnectButton() {
       <div className="relative">
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="flex items-center gap-2.5 h-9 rounded-full border border-border/60 bg-card px-3.5 text-[13px] font-medium transition-all duration-200 hover:bg-accent hover:border-border shadow-sm hover:shadow-md cursor-pointer"
+          className="flex items-center gap-2 h-9 rounded-full px-4 text-[12.5px] font-semibold transition-all duration-200 cursor-pointer"
+          style={{
+            background: "var(--ink)",
+            color: "var(--cream)",
+            fontFamily: "var(--font-mono)",
+          }}
         >
-          <span className="font-mono tracking-tight">
-            {truncateAddress(account.address)}
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--coral)", boxShadow: "0 0 8px var(--coral)" }} />
+          {truncateAddress(account.address)}
+          <span
+            className="transition-transform duration-200"
+            style={{ fontSize: 10, transform: dropdownOpen ? "rotate(180deg)" : "none" }}
+          >
+            ▾
           </span>
-          <ChevronDown
-            className={`h-3 w-3 text-muted-foreground transition-transform duration-200 ${
-              dropdownOpen ? "rotate-180" : ""
-            }`}
-          />
         </button>
 
-        {/* Dropdown */}
         {dropdownOpen && (
           <>
             <div
               className="fixed inset-0 z-40"
               onClick={() => setDropdownOpen(false)}
             />
-            <div className="absolute right-0 top-full mt-2 z-50 w-56 rounded-xl border border-border/50 bg-card p-1.5 shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
+            <div
+              className="absolute right-0 top-full mt-2 z-50 w-60 rounded-[14px] p-2 shadow-[0_20px_40px_-16px_rgba(11,15,23,0.25)]"
+              style={{
+                background: "var(--cream)",
+                border: "1px solid color-mix(in oklab, var(--ink) 14%, transparent)",
+              }}
+            >
               <div className="px-3 py-2.5 mb-1">
-                <p className="text-[11px] text-muted-foreground mb-1">
-                  Connected Wallet
-                </p>
-                <p className="text-[12px] font-mono truncate">
+                <div className="mono-label text-[10px]">Connected wallet</div>
+                <div
+                  className="mt-1.5 text-[11.5px] truncate"
+                  style={{ fontFamily: "var(--font-mono)", color: "var(--ink)" }}
+                >
                   {account.address}
-                </p>
+                </div>
               </div>
 
-              <div className="h-px bg-border/40 mx-1 mb-1" />
+              <div className="h-px mx-1 mb-1" style={{ background: "color-mix(in oklab, var(--ink) 12%, transparent)" }} />
 
               <button
-                onClick={() => {
-                  copyAddress();
+                onClick={copyAddress}
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[12.5px] transition-colors cursor-pointer"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  color: "color-mix(in oklab, var(--ink) 70%, transparent)",
                 }}
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground cursor-pointer"
               >
-                {copied ? (
-                  <Check className="h-3.5 w-3.5" />
-                ) : (
-                  <Copy className="h-3.5 w-3.5" />
-                )}
-                {copied ? "Copied" : "Copy Address"}
+                {copied ? "✓ Copied" : "Copy address"}
               </button>
 
               <button
@@ -77,9 +84,12 @@ export function ConnectButton() {
                   disconnect();
                   setDropdownOpen(false);
                 }}
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-red-400 transition-colors hover:bg-red-500/10 cursor-pointer"
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[12.5px] transition-colors cursor-pointer"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--coral)",
+                }}
               >
-                <LogOut className="h-3.5 w-3.5" />
                 Disconnect
               </button>
             </div>
@@ -92,9 +102,16 @@ export function ConnectButton() {
   return (
     <ConnectModal
       trigger={
-        <button className="flex items-center gap-2 h-9 rounded-full bg-foreground text-background px-5 text-[13px] font-medium transition-all duration-200 hover:opacity-90 shadow-sm hover:shadow-md cursor-pointer">
-          <Wallet className="h-3.5 w-3.5" />
-          Connect
+        <button
+          className="flex items-center gap-2 h-9 rounded-full px-5 text-[13px] font-semibold transition-all duration-200 hover:opacity-90 cursor-pointer"
+          style={{
+            background: "var(--ink)",
+            color: "var(--cream)",
+            fontFamily: "var(--font-body)",
+          }}
+        >
+          Connect wallet
+          <span className="text-[11px]" style={{ color: "var(--coral)" }}>→</span>
         </button>
       }
     />

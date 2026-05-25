@@ -1,73 +1,124 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { formatDate, generateFormLink } from "@/lib/utils";
+import { generateFormLink, formatDate } from "@/lib/utils";
 import type { UserFormEntry } from "@/lib/types";
-import { Copy, ArrowUpRight, Shield, MessageSquare } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
+
+const ACCENTS = ["var(--coral)", "var(--ocean)", "var(--sand)", "var(--ink)"];
 
 interface FormCardProps {
   form: UserFormEntry;
+  index: number;
 }
 
-export function FormCard({ form }: FormCardProps) {
+export function FormCard({ form, index }: FormCardProps) {
   const link = generateFormLink(form.formBlobId);
+  const [copied, setCopied] = useState(false);
+  const accent = ACCENTS[index % ACCENTS.length];
 
-  const copyLink = () => {
+  const copyLink = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     navigator.clipboard.writeText(link);
+    setCopied(true);
     toast.success("Form link copied!");
+    setTimeout(() => setCopied(false), 1400);
   };
 
+  const dateStr = formatDate(form.createdAt);
+
   return (
-    <div className="group relative rounded-2xl border border-border/50 bg-card p-5 transition-all duration-300 hover:border-border hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-3">
-        <h3 className="font-semibold text-[15px] line-clamp-1 pr-2">
-          {form.title || "Untitled Form"}
-        </h3>
+    <Link href={`/dashboard/${form.formBlobId}`}
+      className="block relative rounded-[18px] overflow-hidden p-5 md:p-[22px] transition-all duration-200 group"
+      style={{
+        background: "var(--cream)",
+        border: "1px solid color-mix(in oklab, var(--ink) 14%, transparent)",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-3px)";
+        e.currentTarget.style.boxShadow = "0 20px 40px -20px rgba(11,15,23,0.25)";
+        e.currentTarget.style.borderColor = "color-mix(in oklab, var(--ink) 24%, transparent)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "none";
+        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.borderColor = "color-mix(in oklab, var(--ink) 14%, transparent)";
+      }}>
+      {/* Corner tags */}
+      <div className="absolute top-4 right-5 flex gap-1.5">
         {form.sealAllowlistId && (
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted">
-            <Shield className="h-3 w-3 text-muted-foreground" />
-          </div>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                style={{ background: "var(--ink)", color: "var(--cream)" }}>
+            &#9679; Seal
+          </span>
         )}
       </div>
 
-      {/* Meta */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-          <MessageSquare className="h-3 w-3" />
-          {form.submissionCount} response{form.submissionCount !== 1 ? "s" : ""}
-        </div>
-        <div className="h-3 w-px bg-border" />
-        <p className="text-[12px] text-muted-foreground">
-          {formatDate(form.createdAt)}
-        </p>
+      {/* Index + date */}
+      <div className="mono-label text-[10px]">
+        {String(index + 1).padStart(2, "0")} &middot; {dateStr}
       </div>
+
+      {/* Title */}
+      <h3 className="mt-3 leading-[1.1] pr-20"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 800,
+            fontSize: "clamp(20px, 2.2vw, 28px)",
+            letterSpacing: "-0.025em",
+            color: "var(--ink)",
+          }}>
+        {form.title || "Untitled Form"}
+      </h3>
 
       {/* Blob ID */}
-      <div className="mb-4 rounded-lg bg-muted/50 px-3 py-2">
-        <p className="font-mono text-[11px] text-muted-foreground truncate">
-          {form.formBlobId}
-        </p>
+      <div className="mt-4 px-3 py-2.5 rounded-lg overflow-hidden text-ellipsis whitespace-nowrap"
+           style={{
+             background: "var(--cream-deep)",
+             fontFamily: "var(--font-mono)",
+             fontSize: "11px",
+             color: "color-mix(in oklab, var(--ink) 70%, transparent)",
+           }}>
+        <span style={{ color: accent }}>walrus://</span>
+        {form.formBlobId.slice(0, 16)}<span style={{ opacity: 0.4 }}>&hellip;</span>{form.formBlobId.slice(-6)}
       </div>
 
-      {/* Actions */}
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1 rounded-lg"
-          onClick={copyLink}
-        >
-          <Copy className="h-3 w-3 mr-1.5" />
-          Copy Link
-        </Button>
-        <Button size="sm" className="flex-1 rounded-lg" render={<Link href={`/dashboard/${form.formId}`} />}>
-          View
-          <ArrowUpRight className="h-3 w-3 ml-1.5" />
-        </Button>
+      {/* Response count + actions */}
+      <div className="mt-3.5 flex items-center justify-between gap-3">
+        <div className="flex items-baseline gap-1.5">
+          <span style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 800,
+            fontSize: "32px",
+            letterSpacing: "-0.03em",
+            color: accent,
+          }}>
+            {form.submissionCount || 0}
+          </span>
+          <span className="mono-label text-[10px]">responses</span>
+        </div>
+        <div className="flex gap-1.5">
+          <button onClick={copyLink}
+            className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors"
+            style={{
+              background: "transparent",
+              border: "1px solid color-mix(in oklab, var(--ink) 20%, transparent)",
+              fontFamily: "var(--font-body)",
+            }}>
+            {copied ? "&#10003; copied" : "copy link"}
+          </button>
+          <span className="px-3 py-1.5 rounded-full text-[12px] font-semibold inline-flex items-center gap-1.5"
+            style={{
+              background: "var(--ink)",
+              color: "var(--cream)",
+              fontFamily: "var(--font-body)",
+            }}>
+            open &rarr;
+          </span>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }

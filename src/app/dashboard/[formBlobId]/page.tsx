@@ -1,7 +1,7 @@
 import DashboardPageClient from "./dashboard-page-client";
 
 export async function generateStaticParams() {
-  return [{ formId: "_" }];
+  return [{ formBlobId: "_" }];
 }
 
 export default function FormDetailPage() {

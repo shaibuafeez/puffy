@@ -1,20 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import { FIELD_TYPE_CONFIG } from "@/lib/constants";
 import type { FormField } from "@/lib/types";
-import {
-  Trash2,
-  ChevronUp,
-  ChevronDown,
-  Plus,
-  X,
-  GripVertical,
-  Settings,
-} from "lucide-react";
+
+const GLYPHS: Record<string, string> = {
+  text: "Aa", textarea: "\u00B6", richtext: "\u00B6", email: "@", url: "\u2197",
+  number: "#", dropdown: "\u2304", checkbox: "\u25A2", radio: "\u25EF",
+  "star-rating": "\u2605", "file-upload": "\u2191", confirm: "\u2713",
+};
 
 interface FieldEditorProps {
   field: FormField;
@@ -38,16 +33,11 @@ export function FieldEditor({
   onSelect,
 }: FieldEditorProps) {
   const config = FIELD_TYPE_CONFIG[field.type];
-  const [showConfig, setShowConfig] = useState(false);
+  const glyph = GLYPHS[field.type] || "?";
 
   const hasOptions = ["dropdown", "checkbox", "radio"].includes(field.type);
   const hasPlaceholder = [
-    "text",
-    "textarea",
-    "richtext",
-    "email",
-    "url",
-    "number",
+    "text", "textarea", "richtext", "email", "url", "number",
   ].includes(field.type);
 
   const addOption = () => {
@@ -71,229 +61,164 @@ export function FieldEditor({
 
   return (
     <div
-      className={`group relative rounded-lg transition-all duration-150 animate-in fade-in slide-in-from-top-2 ${
-        selected
-          ? "bg-accent/50 border-l-2 border-l-foreground"
-          : "hover:bg-accent/30 border-l-2 border-l-transparent"
-      }`}
+      draggable
       onClick={onSelect}
+      className="relative cursor-pointer transition-all duration-150"
+      style={{
+        padding: "20px 20px 20px 80px",
+        background: selected ? "var(--cream-deep)" : "transparent",
+        border: selected
+          ? "1px solid color-mix(in oklab, var(--ink) 18%, transparent)"
+          : "1px solid transparent",
+        borderBottom: selected
+          ? "1px solid color-mix(in oklab, var(--ink) 18%, transparent)"
+          : "1px solid color-mix(in oklab, var(--ink) 8%, transparent)",
+        borderRadius: selected ? "14px" : 0,
+        marginTop: selected ? "8px" : 0,
+      }}
     >
-      {/* Main row */}
-      <div className="flex items-center gap-2 px-2 py-2.5">
-        {/* Drag handle */}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity cursor-grab shrink-0">
-          <GripVertical className="h-4 w-4 text-muted-foreground/40" />
-        </div>
-
-        {/* Type badge */}
-        <span className="shrink-0 inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-          {config.label}
+      {/* Left gutter: number + glyph */}
+      <div className="absolute left-4 top-5 flex flex-col items-center gap-1.5">
+        <span className="mono-label text-[13px]" style={{ color: "color-mix(in oklab, var(--ink) 55%, transparent)" }}>
+          {String(index + 1).padStart(2, "0")}
         </span>
-
-        {/* Inline label input */}
-        <input
-          type="text"
-          value={field.label}
-          onChange={(e) => onUpdate({ label: e.target.value })}
-          placeholder="Type a question..."
-          className="flex-1 bg-transparent text-[14px] font-medium outline-none placeholder:text-muted-foreground/40"
-          onClick={(e) => e.stopPropagation()}
-        />
-
-        {/* Required indicator */}
-        {field.required && (
-          <span className="text-[10px] text-destructive font-medium shrink-0">
-            REQ
-          </span>
-        )}
-
-        {/* Actions */}
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowConfig(!showConfig);
-            }}
-          >
-            {showConfig ? (
-              <ChevronUp className="h-3 w-3" />
-            ) : (
-              <Settings className="h-3 w-3" />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMove("up");
-            }}
-            disabled={index === 0}
-          >
-            <ChevronUp className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMove("down");
-            }}
-            disabled={index === total - 1}
-          >
-            <ChevronDown className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove();
-            }}
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
+        <span className="w-[30px] h-[30px] rounded-lg inline-flex items-center justify-center text-[14px] font-bold"
+              style={{
+                fontFamily: "var(--font-mono)",
+                background: selected ? "var(--coral)" : "rgba(0,0,0,0.06)",
+                color: selected ? "var(--ink)" : "color-mix(in oklab, var(--ink) 65%, transparent)",
+              }}>
+          {glyph}
+        </span>
       </div>
 
-      {/* Expandable config panel */}
-      {showConfig && (
-        <div
-          className="px-10 pb-3 space-y-3 animate-in fade-in slide-in-from-top-1 duration-150"
+      {/* Type label + required */}
+      <div className="flex justify-between items-center mb-1">
+        <span className="mono-label text-[10.5px]">
+          {config?.label || field.type} &middot; {config?.description || ""}
+        </span>
+        {field.required && (
+          <span className="mono-label text-[10.5px]" style={{ color: "var(--coral)" }}>required</span>
+        )}
+      </div>
+
+      {/* Question label input */}
+      <input
+        value={field.label}
+        onChange={(e) => onUpdate({ label: e.target.value })}
+        onClick={(e) => e.stopPropagation()}
+        placeholder="Type a question..."
+        className="w-full bg-transparent outline-none p-0"
+        style={{
+          fontFamily: "var(--font-display)",
+          fontWeight: 700,
+          fontSize: "clamp(18px, 2vw, 26px)",
+          letterSpacing: "-0.025em",
+          lineHeight: 1.2,
+          color: "var(--ink)",
+          border: "none",
+        }}
+      />
+
+      {/* Placeholder input */}
+      {hasPlaceholder && (
+        <input
+          value={field.placeholder || ""}
+          onChange={(e) => onUpdate({ placeholder: e.target.value })}
           onClick={(e) => e.stopPropagation()}
-        >
-          <div className="h-px bg-border/30" />
+          placeholder="Placeholder for the respondent..."
+          className="w-full bg-transparent outline-none p-0 mt-2"
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontStyle: "italic",
+            fontSize: "15px",
+            color: "color-mix(in oklab, var(--ink) 55%, transparent)",
+            border: "none",
+          }}
+        />
+      )}
 
-          {/* Description */}
-          <div className="space-y-1">
-            <label className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
-              Description
-            </label>
-            <input
-              type="text"
-              value={field.description || ""}
-              onChange={(e) => onUpdate({ description: e.target.value })}
-              placeholder="Optional helper text..."
-              className="w-full bg-transparent text-[13px] outline-none border-b border-border/30 pb-1.5 placeholder:text-muted-foreground/40 focus:border-border transition-colors"
-            />
-          </div>
-
-          {/* Placeholder */}
-          {hasPlaceholder && (
-            <div className="space-y-1">
-              <label className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
-                Placeholder
-              </label>
-              <input
-                type="text"
-                value={field.placeholder || ""}
-                onChange={(e) => onUpdate({ placeholder: e.target.value })}
-                placeholder="Placeholder text..."
-                className="w-full bg-transparent text-[13px] outline-none border-b border-border/30 pb-1.5 placeholder:text-muted-foreground/40 focus:border-border transition-colors"
-              />
-            </div>
-          )}
-
-          {/* Options */}
-          {hasOptions && (
-            <div className="space-y-2">
-              <label className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
-                Options
-              </label>
-              {(field.options || []).map((opt, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="text-[11px] text-muted-foreground/50 w-4 text-right shrink-0">
-                    {i + 1}
-                  </span>
-                  <input
-                    type="text"
-                    value={opt}
-                    onChange={(e) => updateOption(i, e.target.value)}
-                    className="flex-1 bg-transparent text-[13px] outline-none border-b border-border/30 pb-1 focus:border-border transition-colors"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => removeOption(i)}
-                    disabled={(field.options?.length || 0) <= 1}
-                    className="shrink-0"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
-              <button
-                onClick={addOption}
-                className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Plus className="h-3 w-3" />
-                Add option
+      {/* Options list (for choice/dropdown types) */}
+      {hasOptions && selected && (
+        <div className="mt-3.5 pl-0">
+          {(field.options || []).map((opt, j) => (
+            <div key={j} className="flex items-center gap-2.5 py-1.5"
+                 style={{
+                   borderTop: j === 0 ? "1px dashed color-mix(in oklab, var(--ink) 18%, transparent)" : "none",
+                   borderBottom: "1px dashed color-mix(in oklab, var(--ink) 18%, transparent)",
+                 }}>
+              <span className="mono-label text-[10.5px]">{String.fromCharCode(65 + j)}</span>
+              <input value={opt}
+                onChange={(e) => updateOption(j, e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                className="flex-1 bg-transparent outline-none text-[15px] p-0"
+                style={{ color: "var(--ink)", border: "none" }} />
+              <button onClick={(e) => { e.stopPropagation(); removeOption(j); }}
+                className="mono-label text-[12px]" style={{ color: "color-mix(in oklab, var(--ink) 50%, transparent)" }}>
+                &times;
               </button>
             </div>
-          )}
+          ))}
+          <button onClick={(e) => { e.stopPropagation(); addOption(); }}
+            className="mt-2 mono-label text-[11px]" style={{ color: "var(--coral)" }}>
+            + add option
+          </button>
+        </div>
+      )}
 
-          {/* Star rating max */}
-          {field.type === "star-rating" && (
-            <div className="flex items-center gap-3">
-              <label className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
-                Max Stars
-              </label>
-              <Input
-                type="number"
-                min={1}
-                max={10}
-                value={field.maxRating || 5}
-                onChange={(e) =>
-                  onUpdate({ maxRating: parseInt(e.target.value) || 5 })
-                }
-                className="h-7 w-16 text-[12px]"
-              />
-            </div>
-          )}
+      {/* Star rating config */}
+      {field.type === "star-rating" && selected && (
+        <div className="mt-3 flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+          <span className="mono-label text-[11px]">Max stars</span>
+          <input type="number" min={1} max={10}
+            value={field.maxRating || 5}
+            onChange={(e) => onUpdate({ maxRating: parseInt(e.target.value) || 5 })}
+            className="w-16 h-7 text-[12px] rounded-lg px-2 bg-transparent outline-none"
+            style={{
+              border: "1px solid color-mix(in oklab, var(--ink) 14%, transparent)",
+              fontFamily: "var(--font-mono)",
+            }} />
+        </div>
+      )}
 
-          {/* File upload types */}
-          {field.type === "file-upload" && (
-            <div className="space-y-1.5">
-              <label className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
-                Accepted Types
-              </label>
-              <div className="flex flex-wrap gap-3">
-                {["image/*", "video/*"].map((type) => (
-                  <label
-                    key={type}
-                    className="flex items-center gap-2 text-[12px] cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={(field.acceptTypes || []).includes(type)}
-                      onChange={(e) => {
-                        const types = new Set(field.acceptTypes || []);
-                        if (e.target.checked) types.add(type);
-                        else types.delete(type);
-                        onUpdate({ acceptTypes: Array.from(types) });
-                      }}
-                      className="rounded"
-                    />
-                    {type === "image/*" ? "Images" : "Videos"}
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Required toggle */}
-          <div className="flex items-center justify-between pt-1">
-            <label className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
-              Required
-            </label>
-            <Switch
-              checked={field.required}
-              onCheckedChange={(checked) => onUpdate({ required: checked })}
-            />
-          </div>
+      {/* Action bar when selected */}
+      {selected && (
+        <div className="flex items-center gap-4 mt-4 pt-3.5"
+             style={{ borderTop: "1px dashed color-mix(in oklab, var(--ink) 18%, transparent)" }}>
+          <button onClick={(e) => { e.stopPropagation(); onUpdate({ required: !field.required }); }}
+            className="inline-flex items-center gap-2"
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "11px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: field.required ? "var(--coral)" : "color-mix(in oklab, var(--ink) 55%, transparent)",
+            }}>
+            <span className="w-[14px] h-[14px] rounded inline-flex items-center justify-center text-[10px] font-extrabold"
+                  style={{
+                    border: `1.5px solid ${field.required ? "var(--coral)" : "color-mix(in oklab, var(--ink) 35%, transparent)"}`,
+                    background: field.required ? "var(--coral)" : "transparent",
+                    color: "var(--ink)",
+                  }}>
+              {field.required && "\u2713"}
+            </span>
+            Required
+          </button>
+          <div className="flex-1" />
+          <button onClick={(e) => { e.stopPropagation(); onMove("up"); }}
+            disabled={index === 0}
+            className="mono-label text-[11px] disabled:opacity-30" style={{ color: "color-mix(in oklab, var(--ink) 55%, transparent)" }}>
+            &uarr; up
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); onMove("down"); }}
+            disabled={index === total - 1}
+            className="mono-label text-[11px] disabled:opacity-30" style={{ color: "color-mix(in oklab, var(--ink) 55%, transparent)" }}>
+            &darr; down
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); onRemove(); }}
+            className="mono-label text-[11px]" style={{ color: "color-mix(in oklab, var(--ink) 55%, transparent)" }}>
+            &times;&nbsp;&nbsp;delete
+          </button>
         </div>
       )}
     </div>

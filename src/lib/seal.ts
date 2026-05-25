@@ -5,20 +5,20 @@ import { Transaction } from "@mysten/sui/transactions";
 import { fromHex, toHex } from "@mysten/bcs";
 import type { SealCompatibleClient } from "@mysten/seal";
 
-// Our deployed Move package on testnet
+// Our deployed Move package on mainnet
 export const SEAL_PACKAGE_ID =
-  "0x1e998bf83e5e379308d0662ddfd09cfc358e35cb002281280ad36892b94c90a1";
+  "0xe3df21fc35fd8146a7b84b24e256d2c60bc72c81389d02e7272706a2284921ad";
 
-// Seal key server configs for testnet
+// Seal key server configs for mainnet (Overclock + Studio Mirai, open mode)
 const SEAL_KEY_SERVERS = [
   {
     objectId:
-      "0x3cf2a38f061ede3239c1629cb80a9be0e0676b1c15d34c94d104d4ba9d99076f",
+      "0x145540d931f182fef76467dd8074c9839aea126852d90d18e1556fcbbd1208b6",
     weight: 1,
   },
   {
     objectId:
-      "0x81aeaa8c25d2c912e1dc23b4372305b7a602c4ec4cc3e510963bc635e500aa37",
+      "0xe0eb52eba9261b96e895bbb4deca10dcd64fbc626a1133017adcd5131353fd10",
     weight: 1,
   },
 ];

@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import type { FormDefinition, FormField, FormSettings, FieldType } from "@/lib/types";
 
 const defaultSettings: FormSettings = {
-  encryptSubmissions: false,
+  encryptSubmissions: true,
   allowAnonymous: true,
   submitMessage: "Thank you for your submission!",
 };
@@ -28,9 +28,11 @@ function createField(type: FieldType): FormField {
     case "file-upload":
       return {
         ...base,
-        acceptTypes: ["image/*"],
+        acceptTypes: ["image/*", "video/*"],
         maxFileSize: 10 * 1024 * 1024,
       };
+    case "confirm":
+      return { ...base, required: true };
     default:
       return base;
   }
